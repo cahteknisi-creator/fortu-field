@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Fortu Field</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="description" content="Fortu Field — jadwal teknisi, barang & stok PT Fortu Digital Teknologi">
+<meta name="theme-color" content="#0B0B0C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Fortu Field">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  /* Halaman pembungkus Fortu Field: aplikasi (Google Apps Script) tampil penuh layar di dalam halaman Fortu sendiri. */
+  :root { --hitam: #0B0B0C; --latar: #EDEFF2; --silver: #B9BEC4; --putih: #FFFFFF; }
+  html, body { margin: 0; height: 100%; background: var(--hitam); overflow: hidden; }
+  body { font-family: "IBM Plex Sans", "Segoe UI", Roboto, Arial, sans-serif; -webkit-text-size-adjust: 100%; }
+  /* garis aman iPhone (poni & garis bawah): hitam saat layar pembuka (sama dengan APK), lalu ikut warna aplikasi */
+  .aman-atas { position: fixed; left: 0; right: 0; top: 0; height: env(safe-area-inset-top); background: var(--hitam); transition: background .3s; z-index: 3; }
+  .aman-bawah { position: fixed; left: 0; right: 0; bottom: 0; height: env(safe-area-inset-bottom); background: var(--hitam); z-index: 3; transition: background .3s; }
+  body.buka .aman-atas { background: var(--latar); } body.buka .aman-bawah { background: var(--putih); }
+  iframe { position: fixed; left: env(safe-area-inset-left); right: env(safe-area-inset-right);
+           top: env(safe-area-inset-top); bottom: env(safe-area-inset-bottom);
+           width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));
+           height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+           border: 0; background: var(--latar); opacity: 0; transition: opacity .25s; z-index: 1; }
+  iframe.siap { opacity: 1; }
+  .layar { position: fixed; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
+           background: var(--hitam); color: var(--putih); transition: opacity .3s; text-align: center; padding: 24px; }
+  .layar.hilang { opacity: 0; pointer-events: none; }
+  .logo { width: 240px; height: auto; }
+  .merek { margin-top: 18px; letter-spacing: 6px; font-weight: 700; font-size: 15px; }
+  .merek span { color: #6B7076; font-weight: 400; letter-spacing: 3px; }
+  .garis { visibility: hidden; width: 140px; height: 2px; margin: 26px auto 0; background: #26282B; overflow: hidden; border-radius: 2px; }
+  .garis i { display: block; width: 40%; height: 100%; background: var(--silver); animation: jalan 1.1s ease-in-out infinite; }
+  @keyframes jalan { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+  .ket { margin-top: 16px; font-size: 12.5px; color: var(--silver); letter-spacing: .4px; min-height: 18px; }
+  .tombol { display: none; margin-top: 18px; gap: 10px; }
+  .tombol.ada { display: flex; }
+  .tombol a, .tombol button { font: inherit; font-size: 13px; font-weight: 600; letter-spacing: .6px; padding: 11px 16px; border-radius: 4px;
+           border: 1px solid #3A3D42; background: transparent; color: var(--putih); text-decoration: none; cursor: pointer; }
+  .tombol button { background: var(--putih); color: var(--hitam); border-color: var(--putih); }
+  .kaki { position: absolute; bottom: calc(18px + env(safe-area-inset-bottom)); font-size: 10.5px; letter-spacing: 2px; color: #5B5F66; }
+</style>
+</head>
+<body>
+<div class="aman-atas"></div><div class="aman-bawah"></div>
+<div class="layar" id="layar">
+  <img class="logo" src="logo.png" alt="">
+    <div class="garis" id="garis"><i></i></div>
+  <div class="ket" id="ket"></div>
+  <div class="tombol" id="tombol"><button type="button" id="ulang">Muat ulang</button><a id="langsung" href="#" target="_top">Buka langsung</a></div>
+</div>
+<iframe id="app" title="Fortu Field" allow="clipboard-read; clipboard-write; geolocation; fullscreen" referrerpolicy="no-referrer-when-downgrade"></iframe>
+<script>
+  // ===== SATU-SATUNYA YANG PERLU DIGANTI bila link web app (deployment) berubah =====
+  var LINK_APP = 'https://script.google.com/macros/s/AKfycbx7rhfgk0VFhC8qIUyZHh3gTHsk3rT1b1PKj_dWtuT9vZhmRJPcVOBHhugOZdBe6ExC/exec';
+  // ====================================================================================
+  (function () {
+    var src = LINK_APP + (location.search || '');            // ?m=admin / ?m=gudang tetap diteruskan
+    var f = document.getElementById('app'), layar = document.getElementById('layar'), ket = document.getElementById('ket');
+    var tombol = document.getElementById('tombol'), selesai = false;
+    document.getElementById('langsung').href = src;
+    document.getElementById('ulang').onclick = function () { location.reload(); };
+    f.onload = function () {
+      if (!f.getAttribute('src')) return;
+      selesai = true; f.className = 'siap'; document.body.className = 'buka';
+      setTimeout(function () { layar.className = 'layar hilang'; }, 150);
+    };
+    // sama dengan APK: hanya logo. Keterangan baru muncul bila sinyal lambat.
+    setTimeout(function () { if (!selesai) { ket.textContent = 'Sinyal lambat, sebentar lagi…'; document.getElementById('garis').style.visibility = 'visible'; } }, 6000);
+    setTimeout(function () { if (!selesai) { ket.textContent = 'Belum terbuka. Periksa internet, lalu muat ulang.'; tombol.className = 'tombol ada'; } }, 25000);
+    f.setAttribute('src', src);
+  })();
+</script>
+</body>
+</html>

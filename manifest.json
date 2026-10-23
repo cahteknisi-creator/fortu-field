@@ -1,0 +1,14 @@
+{
+  "name": "Fortu Field",
+  "short_name": "Fortu Field",
+  "description": "Jadwal teknisi, barang & stok — PT Fortu Digital Teknologi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B0B0C",
+  "theme_color": "#0B0B0C",
+  "icons": [
+    { "src": "ikon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "ikon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
