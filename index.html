@@ -70,8 +70,8 @@
       selesai = true; f.className = 'siap'; document.body.className = 'buka';
       setTimeout(function () { layar.className = 'layar hilang'; }, 150);
     };
-    // sama dengan APK: hanya logo. Keterangan baru muncul bila sinyal lambat.
-    setTimeout(function () { if (!selesai) { ket.textContent = 'Sinyal lambat, sebentar lagi…'; document.getElementById('garis').style.visibility = 'visible'; } }, 6000);
+    // sama dengan APK: hanya logo. Server Google kadang butuh beberapa detik untuk bangun → keterangan netral, bukan "sinyal".
+    setTimeout(function () { if (!selesai) { ket.textContent = 'Menyiapkan aplikasi…'; document.getElementById('garis').style.visibility = 'visible'; } }, 8000);
     setTimeout(function () { if (!selesai) { ket.textContent = 'Belum terbuka. Periksa internet, lalu muat ulang.'; tombol.className = 'tombol ada'; } }, 25000);
     f.setAttribute('src', src);
   })();
