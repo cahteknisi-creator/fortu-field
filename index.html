@@ -31,7 +31,11 @@
   .layar { position: fixed; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
            background: var(--hitam); color: var(--putih); transition: opacity .3s; text-align: center; padding: 24px; }
   .layar.hilang { opacity: 0; pointer-events: none; }
-  .logo { width: 240px; height: auto; }
+  .kunci { display: flex; align-items: center; gap: 34px; }
+  .logo { height: 150px; width: auto; display: block; }
+  .pisah { width: 1px; height: 110px; background: #4A4E54; }
+  .slogan { color: #C8CCD1; font-size: 26px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; line-height: 1.35; text-align: left; white-space: nowrap; }
+  @media (max-width: 600px) { .kunci { gap: 18px; } .logo { height: 96px; } .pisah { height: 72px; } .slogan { font-size: 15px; letter-spacing: 2px; white-space: normal; max-width: 130px; } }
   .merek { margin-top: 18px; letter-spacing: 6px; font-weight: 700; font-size: 15px; }
   .merek span { color: #6B7076; font-weight: 400; letter-spacing: 3px; }
   .garis { visibility: hidden; width: 140px; height: 2px; margin: 26px auto 0; background: #26282B; overflow: hidden; border-radius: 2px; }
@@ -49,7 +53,7 @@
 <body>
 <div class="aman-atas"></div><div class="aman-bawah"></div>
 <div class="layar" id="layar">
-  <img class="logo" src="logo.png" alt="">
+  <div class="kunci"><img class="logo" src="logo.png" alt="Fortu Digital"><span class="pisah"></span><span class="slogan">Elevate Your Vision</span></div>
     <div class="garis" id="garis"><i></i></div>
   <div class="ket" id="ket"></div>
   <div class="tombol" id="tombol"><button type="button" id="ulang">Muat ulang</button><a id="langsung" href="#" target="_top">Buka langsung</a></div>
@@ -70,7 +74,7 @@
       selesai = true; f.className = 'siap'; document.body.className = 'buka';
       setTimeout(function () { layar.className = 'layar hilang'; }, 150);
     };
-    // sama dengan APK: hanya logo. Server Google kadang butuh beberapa detik untuk bangun → keterangan netral, bukan "sinyal".
+    // web: logo + slogan; APK: hanya logo. Server Google kadang butuh beberapa detik untuk bangun → keterangan netral, bukan "sinyal".
     setTimeout(function () { if (!selesai) { ket.textContent = 'Menyiapkan aplikasi…'; document.getElementById('garis').style.visibility = 'visible'; } }, 8000);
     setTimeout(function () { if (!selesai) { ket.textContent = 'Belum terbuka. Periksa internet, lalu muat ulang.'; tombol.className = 'tombol ada'; } }, 25000);
     f.setAttribute('src', src);
