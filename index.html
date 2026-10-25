@@ -31,10 +31,27 @@
   .layar { position: fixed; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
            background: var(--hitam); color: var(--putih); transition: opacity .3s; text-align: center; padding: 24px; }
   .layar.hilang { opacity: 0; pointer-events: none; }
+  /* v1.25 animasi pembuka ringan (corporate): logo naik-pudar → garis pemisah tumbuh → slogan tersapu → garis muat berkilau.
+     Latar hitam dengan cahaya silver sangat tipis di tengah. Sama persis dengan layar pembuka di dalam aplikasi (keadaan akhir). */
+  .layar { background: radial-gradient(ellipse 60% 55% at 50% 46%, #17181B 0%, #0B0B0C 70%); }
+  .logo { opacity: 0; transform: translateY(10px) scale(.97); }
+  .pisah { transform: scaleY(0); }
+  .slogan { opacity: 0; clip-path: inset(0 100% 0 0); }
+  body.mulai .logo { animation: fMasuk .75s cubic-bezier(.2,.7,.2,1) forwards; }
+  body.mulai .pisah { animation: fTumbuh .5s .45s cubic-bezier(.2,.7,.2,1) forwards; }
+  body.mulai .slogan { animation: fSapu .9s .7s cubic-bezier(.25,.7,.2,1) forwards; }
+  body.mulai .garis { visibility: visible; opacity: 0; animation: fMuncul .5s 1.4s forwards; }
+  .layar.hilang .kunci { transform: scale(1.02); transition: transform .45s ease; }
+  body.diam .logo, body.diam .pisah, body.diam .slogan { animation: none !important; opacity: 1; transform: none; clip-path: none; }   /* setelah animasi: gambar statis (tajam, identik dengan aplikasi) */
+  @keyframes fMasuk { to { opacity: 1; transform: none; } }
+  @keyframes fTumbuh { to { transform: scaleY(1); } }
+  @keyframes fSapu { 0% { opacity: 0; clip-path: inset(0 100% 0 0); } 15% { opacity: 1; } 100% { opacity: 1; clip-path: inset(0 0 0 0); } }
+  @keyframes fMuncul { to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .logo, .pisah, .slogan { opacity: 1 !important; transform: none !important; clip-path: none !important; animation: none !important; } }
   .kunci { display: flex; align-items: center; gap: 34px; }
   .logo { height: 150px; width: auto; display: block; }
   .pisah { width: 1px; height: 110px; background: #4A4E54; }
-  .slogan { color: #C8CCD1; font-size: 26px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; line-height: 1.35; text-align: left; white-space: nowrap; }
+  .slogan { color: #FFFFFF; font-size: 26px; font-weight: 300; letter-spacing: 3px; text-transform: uppercase; line-height: 1.35; text-align: left; white-space: nowrap; }
   @media (max-width: 600px) { .kunci { gap: 18px; } .logo { height: 96px; } .pisah { height: 72px; } .slogan { font-size: 15px; letter-spacing: 2px; white-space: normal; max-width: 130px; } }
   .merek { margin-top: 18px; letter-spacing: 6px; font-weight: 700; font-size: 15px; }
   .merek span { color: #6B7076; font-weight: 400; letter-spacing: 3px; }
@@ -53,7 +70,7 @@
 <body>
 <div class="aman-atas"></div><div class="aman-bawah"></div>
 <div class="layar" id="layar">
-  <div class="kunci"><img class="logo" src="logo.png" alt="Fortu Digital"><span class="pisah"></span><span class="slogan">Elevate Your Vision</span></div>
+  <div class="kunci"><img class="logo" src="logo.png" alt="Fortu Digital" onload="document.body.classList.add('mulai')"><span class="pisah"></span><span class="slogan">Elevate Your Vision</span></div>
     <div class="garis" id="garis"><i></i></div>
   <div class="ket" id="ket"></div>
   <div class="tombol" id="tombol"><button type="button" id="ulang">Muat ulang</button><a id="langsung" href="#" target="_top">Buka langsung</a></div>
@@ -71,14 +88,19 @@
     document.getElementById('ulang').onclick = function () { location.reload(); };
     // v1.25 tanpa kedip putih: layar pembuka ditutup saat aplikasi memberi tanda (layar pembukanya sendiri sudah tampil, identik);
     // halaman Google yang masih putih di antaranya tidak pernah terlihat. Cadangan: 6 dtk setelah iframe termuat.
-    var buka = function () { if (selesai) return; selesai = true; f.className = 'siap'; setTimeout(function () { layar.className = 'layar hilang'; }, 60); };
+    // animasi pembuka selesai (±1,9 dtk) dulu, baru diserahkan ke layar pembuka aplikasi (identik) → tidak ada loncatan
+    var t0 = Date.now(), MIN = 1900;
+    var buka = function () { if (selesai) return; var sisa = MIN - (Date.now() - t0); if (sisa > 0) return setTimeout(buka, sisa); if (!document.body.classList.contains('diam') && Date.now() - t0 < 4000) return setTimeout(buka, 100); selesai = true; f.className = 'siap'; setTimeout(function () { layar.className = 'layar hilang'; }, 60); };
+    document.querySelector('.slogan').addEventListener('animationend', function () { document.body.classList.add('diam'); });
+    var gi = document.querySelector('#garis i'); if (gi) gi.style.animationDelay = (-(Date.now() % 1100)) + 'ms';   // fase kilau sama dengan di aplikasi
     window.addEventListener('message', function (e) {
       if (!/(^|\.)googleusercontent\.com$|^script\.google\.com$/.test(String(e.origin || '').replace(/^https:\/\//, ''))) return;
       var d = e.data || {}; if (d.fortu === 'boot') buka(); if (d.fortu === 'siap') { buka(); document.body.className = 'buka'; }
     });
     f.onload = function () { if (!f.getAttribute('src')) return; setTimeout(buka, 6000); };
     // web: logo + slogan; APK: hanya logo. Server Google kadang butuh beberapa detik untuk bangun → keterangan netral, bukan "sinyal".
-    setTimeout(function () { if (!selesai) { ket.textContent = 'Menyiapkan aplikasi…'; document.getElementById('garis').style.visibility = 'visible'; } }, 8000);
+    setTimeout(function () { if (!selesai) { ket.textContent = 'Menyiapkan aplikasi…'; } }, 8000);
+    setTimeout(function () { document.body.classList.add('mulai'); }, 1500);   // cadangan bila logo lambat dimuat
     setTimeout(function () { if (!selesai) { ket.textContent = 'Belum terbuka. Periksa internet, lalu muat ulang.'; tombol.className = 'tombol ada'; } }, 25000);
     f.setAttribute('src', src);
   })();
