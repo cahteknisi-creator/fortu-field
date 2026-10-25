@@ -26,7 +26,7 @@
            top: env(safe-area-inset-top); bottom: env(safe-area-inset-bottom);
            width: calc(100% - env(safe-area-inset-left) - env(safe-area-inset-right));
            height: calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-           border: 0; background: var(--latar); opacity: 0; transition: opacity .25s; z-index: 1; }
+           border: 0; background: var(--hitam); opacity: 0; transition: opacity .25s; z-index: 1; }
   iframe.siap { opacity: 1; }
   .layar { position: fixed; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center;
            background: var(--hitam); color: var(--putih); transition: opacity .3s; text-align: center; padding: 24px; }
@@ -69,11 +69,14 @@
     var tombol = document.getElementById('tombol'), selesai = false;
     document.getElementById('langsung').href = src;
     document.getElementById('ulang').onclick = function () { location.reload(); };
-    f.onload = function () {
-      if (!f.getAttribute('src')) return;
-      selesai = true; f.className = 'siap'; document.body.className = 'buka';
-      setTimeout(function () { layar.className = 'layar hilang'; }, 150);
-    };
+    // v1.25 tanpa kedip putih: layar pembuka ditutup saat aplikasi memberi tanda (layar pembukanya sendiri sudah tampil, identik);
+    // halaman Google yang masih putih di antaranya tidak pernah terlihat. Cadangan: 6 dtk setelah iframe termuat.
+    var buka = function () { if (selesai) return; selesai = true; f.className = 'siap'; setTimeout(function () { layar.className = 'layar hilang'; }, 60); };
+    window.addEventListener('message', function (e) {
+      if (!/(^|\.)googleusercontent\.com$|^script\.google\.com$/.test(String(e.origin || '').replace(/^https:\/\//, ''))) return;
+      var d = e.data || {}; if (d.fortu === 'boot') buka(); if (d.fortu === 'siap') { buka(); document.body.className = 'buka'; }
+    });
+    f.onload = function () { if (!f.getAttribute('src')) return; setTimeout(buka, 6000); };
     // web: logo + slogan; APK: hanya logo. Server Google kadang butuh beberapa detik untuk bangun → keterangan netral, bukan "sinyal".
     setTimeout(function () { if (!selesai) { ket.textContent = 'Menyiapkan aplikasi…'; document.getElementById('garis').style.visibility = 'visible'; } }, 8000);
     setTimeout(function () { if (!selesai) { ket.textContent = 'Belum terbuka. Periksa internet, lalu muat ulang.'; tombol.className = 'tombol ada'; } }, 25000);
