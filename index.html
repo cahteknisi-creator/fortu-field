@@ -118,6 +118,16 @@
     setTimeout(function () { if (!selesai) { ket.textContent = 'Menyiapkan aplikasi…'; } }, 8000);
     setTimeout(function () { document.body.classList.add('mulai'); }, 1500);   // cadangan bila logo lambat dimuat
     setTimeout(function () { if (!selesai) { ket.textContent = 'Belum terbuka. Periksa internet, lalu muat ulang.'; tombol.className = 'tombol ada'; } }, 25000);
+    var tawar = null, ASAL = /(^|\.)googleusercontent\.com$|^script\.google\.com$/;
+    var sumber = null, kabari = function (m) { try { (sumber || f.contentWindow).postMessage({ fortu: m }, '*'); } catch (e) {} };
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); tawar = e; kabari('bisaPasang'); });
+    window.addEventListener('appinstalled', function () { tawar = null; kabari('terpasang'); });
+    window.addEventListener('message', function (e) {
+      if (!ASAL.test(String(e.origin || '').replace(/^https:\/\//, ''))) return;
+      var d = e.data || {}; if (e.source) sumber = e.source;
+      if (d.fortu === 'tanyaPasang' && tawar) kabari('bisaPasang');
+      if (d.fortu === 'pasang' && tawar) { tawar.prompt(); tawar.userChoice.then(function (r) { if (r && r.outcome === 'accepted') kabari('terpasang'); tawar = null; }); }
+    });
     f.setAttribute('src', src);
   })();
 </script>
